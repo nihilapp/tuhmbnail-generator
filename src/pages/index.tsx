@@ -1,16 +1,39 @@
-import React from 'react';
+import React, { ChangeEvent, useCallback, useState } from 'react';
 import tw, { css } from 'twin.macro';
 
-export default function index() {
+export default function IndexPage() {
+  const [ title, setTitle, ] = useState('제목을 입력하세요.');
+  const [ subTitle, setSubTitle, ] = useState('부제');
+
+  const onChangeTitle = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      setTitle(event.target.value);
+    },
+    []
+  );
+
+  const onChangeSubTitle = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      setSubTitle(event.target.value);
+    },
+    []
+  );
+
   const style = {
     default: css([
       tw` w-[1280px] mx-auto `,
     ]),
     frame: css([
-      tw` box-content border border-black-base aspect-video mb-10 `,
+      tw` box-content border border-black-base aspect-video mb-10 relative `,
+    ]),
+    inputs: css([
+      tw` space-y-2 `,
     ]),
     input: css([
-      tw` p-2 text-normal text-blue-600 placeholder:text-blue-400 block bg-blue-50 w-full border border-blue-500 `,
+      tw` flex flex-col gap-1 `,
+      tw` [span]:( font-semibold text-normal text-black-base ) `,
+      tw` [input]:( p-2 outline-none text-normal bg-black-100 text-black-base placeholder:text-black-300 border-b-[2px] border-transparent transition-colors duration-200 ) `,
+      tw` [input]:( focus:( border-blue-500 ) ) `,
     ]),
     colors: tw` flex mt-10 `,
     colorTab: css([
@@ -24,14 +47,54 @@ export default function index() {
       tw` flex gap-5 `,
       tw` [button]:( flex-1 shrink-0 bg-blue-400 text-white p-3 hover:( bg-blue-600 ) ) `,
     ]),
+    titles: css([
+      tw` absolute top-[50%] translate-y-[-50%] left-[50%] translate-x-[-50%] text-center w-full `,
+    ]),
+    title: css([
+      tw` text-[4rem] font-black whitespace-pre-line `,
+    ]),
+    subTitle: css([
+      tw` text-[3rem] font-semibold `,
+    ]),
   };
 
   return (
     <>
       <div css={style.default}>
-        <div css={style.frame} />
-        <input type='text' id='title' placeholder='제목' css={style.input} />
-        <input type='text' id='sub-title' placeholder='부제' css={style.input} />
+        <div id='th-frame' css={style.frame}>
+          <div id='th-titles' css={style.titles}>
+            <h1 id='th-title' css={style.title}>
+              {title.split('\\n').map((item, index) => (
+                // eslint-disable-next-line react/no-array-index-key
+                <React.Fragment key={`${item}-${index}`}>{item}<br /></React.Fragment>
+              ))}
+            </h1>
+            <h2 id='th-sub-title' css={style.subTitle}>{subTitle}</h2>
+          </div>
+        </div>
+
+        <div css={style.inputs}>
+          <label htmlFor='title' css={style.input}>
+            <span>제목</span>
+            <input
+              type='text'
+              id='title'
+              placeholder='제목'
+              value={title}
+              onChange={onChangeTitle}
+            />
+          </label>
+          <label htmlFor='sub-title' css={style.input}>
+            <span>부제</span>
+            <input
+              type='text'
+              id='sub-title'
+              placeholder='부제'
+              value={subTitle}
+              onChange={onChangeSubTitle}
+            />
+          </label>
+        </div>
 
         <div css={style.colors}>
           <button css={style.colorTab} data-selected='true'>단색 배경</button>
