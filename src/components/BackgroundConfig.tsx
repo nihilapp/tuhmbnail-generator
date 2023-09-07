@@ -38,11 +38,8 @@ export function BackgroundConfig() {
           : tw` bg-black-200 text-black-400 `,
       ]);
     },
-    colorTabBottom: css([
+    tabBottom: css([
       tw` flex flex-row border border-black-200 border-t-0 p-5 bg-white mb-10 `,
-    ]),
-    imageTabBotton: css([
-      tw`  `,
     ]),
   };
 
@@ -54,14 +51,14 @@ export function BackgroundConfig() {
       </div>
 
       {bgType === 'color' && (
-        <div css={style.colorTabBottom}>
+        <div css={style.tabBottom}>
           <ColorSlider type='background' align='vertical' />
         </div>
       )}
 
       {bgType === 'image' && (
-        <div css={style.imageTabBotton}>
-          <input type='text' id='image-src' placeholder='이미지 주소를 입력하세요' />
+        <div css={style.tabBottom}>
+          {/* <input type='text' id='image-src' placeholder='이미지 주소를 입력하세요' /> */}
         </div>
       )}
     </>
