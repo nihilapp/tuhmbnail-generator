@@ -1,5 +1,5 @@
 import React, {
-  ChangeEvent, useCallback, useMemo, useState
+  ChangeEvent, useCallback, useEffect, useMemo, useState
 } from 'react';
 import tw, { css } from 'twin.macro';
 import { useAppDispatch } from '@/hooks/rtk';
@@ -11,11 +11,15 @@ interface Props {
 }
 
 export function ColorSlider({ align = 'vertical', type = 'background', }: Props) {
-  const [ red, setRed, ] = useState(50);
-  const [ green, setGreen, ] = useState(50);
-  const [ blue, setBlue, ] = useState(50);
+  const [ red, setRed, ] = useState(type === 'text' ? 51 : 255);
+  const [ green, setGreen, ] = useState(type === 'text' ? 51 : 255);
+  const [ blue, setBlue, ] = useState(type === 'text' ? 51 : 255);
 
   const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    setColor([ red, green, blue, ]);
+  }, []);
 
   const onChangeRed = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {

@@ -2,6 +2,7 @@ import React, { ChangeEvent, useCallback } from 'react';
 import tw, { css } from 'twin.macro';
 import { useAppDispatch, useAppSelector } from '@/hooks/rtk';
 import { setSubTitle, setTitle } from '@/redux';
+import { ColorSlider } from '.';
 
 export function TextConfig() {
   const { title, subTitle, } = useAppSelector(
@@ -28,26 +29,9 @@ export function TextConfig() {
     []
   );
 
-  // const [ title, setTitle, ] = useState('제목을 입력하세요.');
-  // const [ subTitle, setSubTitle, ] = useState('부제');
-
-  // const onChangeTitle = useCallback(
-  //   (event: ChangeEvent<HTMLInputElement>) => {
-  //     setTitle(event.target.value);
-  //   },
-  //   []
-  // );
-
-  // const onChangeSubTitle = useCallback(
-  //   (event: ChangeEvent<HTMLInputElement>) => {
-  //     setSubTitle(event.target.value);
-  //   },
-  //   []
-  // );
-
   const style = {
     inputs: css([
-      tw` space-y-2 `,
+      tw` space-y-2 p-5 bg-white border-2 border-t-0 border-black-600 `,
     ]),
     input: css([
       tw` flex flex-col gap-1 `,
@@ -55,10 +39,13 @@ export function TextConfig() {
       tw` [input]:( p-2 outline-none text-normal bg-black-100 text-black-base placeholder:text-black-300 border-b-[2px] border-transparent transition-colors duration-200 ) `,
       tw` [input]:( focus:( border-blue-500 ) ) `,
     ]),
+    h2: tw` text-h2 text-white font-black p-3 bg-black-600 `,
+    span: tw` font-semibold text-normal text-black-base `,
   };
 
   return (
     <>
+      <h2 css={style.h2}>텍스트 설정</h2>
       <div css={style.inputs}>
         <label htmlFor='title' css={style.input}>
           <span>제목</span>
@@ -80,6 +67,10 @@ export function TextConfig() {
             onChange={onChangeSubTitle}
           />
         </label>
+        <div>
+          <span css={style.span}>색상</span>
+          <ColorSlider type='text' />
+        </div>
       </div>
     </>
   );
