@@ -3,11 +3,12 @@ import React, {
 } from 'react';
 import tw, { css } from 'twin.macro';
 import { useAppDispatch, useAppSelector } from '@/hooks/rtk';
-import { setBgType, setImg } from '@/redux';
+import { setBgType, setImg, setY as setImageY } from '@/redux';
 import { ColorSlider } from '.';
 
 export function BackgroundConfig() {
   const [ srcValue, setSrcValue, ] = useState('');
+  const [ y, setY, ] = useState(0);
 
   const bgType = useAppSelector(
     (state) => state.app.bgType
@@ -28,6 +29,9 @@ export function BackgroundConfig() {
       dispatch(setBgType({
         value: 'image',
       }));
+      dispatch(setImg({
+        value: '',
+      }));
     },
     []
   );
@@ -37,6 +41,16 @@ export function BackgroundConfig() {
       setSrcValue(event.target.value);
       dispatch(setImg({
         value: event.target.value,
+      }));
+    },
+    []
+  );
+
+  const onChangeY = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      setY(+event.target.value);
+      dispatch(setImageY({
+        value: +event.target.value,
       }));
     },
     []
@@ -53,7 +67,7 @@ export function BackgroundConfig() {
       ]);
     },
     tabBottom: css([
-      tw` flex flex-row border-2 border-black-600 p-5 bg-white mb-10 `,
+      tw` flex flex-row gap-5 border-2 border-black-600 p-5 bg-white `,
     ]),
     input: css([
       tw` flex flex-col gap-1 w-full `,
@@ -86,6 +100,17 @@ export function BackgroundConfig() {
               placeholder='이미지 주소를 입력하세요'
               value={srcValue}
               onChange={onChangeSrc}
+            />
+          </label>
+
+          <label htmlFor='image-y' css={style.input}>
+            <span>Y좌표</span>
+            <input
+              type='text'
+              id='image-y'
+              placeholder='원하는 좌표를 입력하세요'
+              value={y}
+              onChange={onChangeY}
             />
           </label>
         </div>

@@ -1,8 +1,8 @@
 import React, {
-  ChangeEvent, useCallback, useEffect, useMemo, useState
+  ChangeEvent, useCallback, useEffect, useMemo
 } from 'react';
 import tw, { css } from 'twin.macro';
-import { useAppDispatch } from '@/hooks/rtk';
+import { useAppDispatch, useAppSelector } from '@/hooks/rtk';
 import { setBgColor, setTextColor } from '@/redux';
 
 interface Props {
@@ -11,68 +11,62 @@ interface Props {
 }
 
 export function ColorSlider({ align = 'vertical', type = 'background', }: Props) {
-  const [ red, setRed, ] = useState(type === 'text' ? 51 : 255);
-  const [ green, setGreen, ] = useState(type === 'text' ? 51 : 255);
-  const [ blue, setBlue, ] = useState(type === 'text' ? 51 : 255);
+  const { textColor, bgColor, } = useAppSelector(
+    (state) => state.app
+  );
+
+  const color = useMemo(() => {
+    return type === 'text'
+      ? textColor
+      : bgColor;
+  }, [ textColor, bgColor, ]);
 
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    setColor([ red, green, blue, ]);
+    setColor([ color.red, color.green, color.blue, ]);
   }, []);
 
   const onChangeRed = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
-      setRed(+event.target.value);
-      setColor([ +event.target.value, green, blue, ]);
+      setColor([ +event.target.value, color.green, color.blue, ]);
     },
-    [ green, blue, ]
+    [ color.green, color.blue, ]
   );
 
   const onChangeGreen = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
-      setGreen(+event.target.value);
-      setColor([ red, +event.target.value, blue, ]);
+      setColor([ color.red, +event.target.value, color.blue, ]);
     },
-    [ red, blue, ]
+    [ color.red, color.blue, ]
   );
 
   const onChangeBlue = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
-      setBlue(+event.target.value);
-      setColor([ red, green, +event.target.value, ]);
+      setColor([ color.red, color.green, +event.target.value, ]);
     },
-    [ red, green, ]
+    [ color.red, color.green, ]
   );
 
-  function convertHex(number: number) {
-    const hex = number.toString(16).toUpperCase();
-
-    return hex.length > 1
-      ? hex
-      : `0${hex}`;
-  }
-
   function setColor(colors: number[]) {
-    const hex = colors.map((color) => convertHex(color));
-
     if (type === 'background') {
       dispatch(setBgColor({
-        value: `#${hex.join('')}`,
+        value: {
+          red: colors[0],
+          green: colors[1],
+          blue: colors[2],
+        },
       }));
     } else {
       dispatch(setTextColor({
-        value: `#${hex.join('')}`,
+        value: {
+          red: colors[0],
+          green: colors[1],
+          blue: colors[2],
+        },
       }));
     }
   }
-
-  const hexCode = useMemo(() => {
-    const hex = [ red, green, blue, ]
-      .map((color) => convertHex(color));
-
-    return `#${hex.join('')}`;
-  }, [ red, green, blue, ]);
 
   const style = {
     container: css([
@@ -91,7 +85,7 @@ export function ColorSlider({ align = 'vertical', type = 'background', }: Props)
     ]),
     colorView: css([
       (css`
-        background-color: ${hexCode};
+        background-color: rgb(${color.red}, ${color.green}, ${color.blue});
       `),
       align === 'vertical' && tw` w-[150px] aspect-square border-2 border-[black] `,
       align === 'horizontal' && tw` w-full h-20 border-2 border-[black] order-1 `,
@@ -107,33 +101,33 @@ export function ColorSlider({ align = 'vertical', type = 'background', }: Props)
               type='range'
               min={0}
               max={255}
-              value={red}
+              value={color.red}
               onChange={onChangeRed}
               css={style.slider}
             />
-            <span>{red}</span>
+            <span>{color.red}</span>
           </div>
           <div>
             <input
               type='range'
               min={0}
               max={255}
-              value={green}
+              value={color.green}
               onChange={onChangeGreen}
               css={style.slider}
             />
-            <span>{green}</span>
+            <span>{color.green}</span>
           </div>
           <div>
             <input
               type='range'
               min={0}
               max={255}
-              value={blue}
+              value={color.blue}
               onChange={onChangeBlue}
               css={style.slider}
             />
-            <span>{blue}</span>
+            <span>{color.blue}</span>
           </div>
         </div>
         <div css={style.colorView} />

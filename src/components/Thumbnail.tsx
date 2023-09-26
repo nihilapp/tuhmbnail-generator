@@ -1,29 +1,74 @@
-import React from 'react';
+import React, {
+  useCallback, useEffect, useRef, useState
+} from 'react';
 import tw, { css } from 'twin.macro';
-import { useAppSelector } from '@/hooks/rtk';
+import html2canvas from 'html2canvas';
+import { useAppDispatch, useAppSelector } from '@/hooks/rtk';
+import { initState } from '@/redux';
 
 export function Thumbnail() {
+  const [ isClick, setIsClick, ] = useState(false);
+
+  const thRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
+  const dispatch = useAppDispatch();
+
   const {
-    title, subTitle, bgType, imgSrc, bgColor, textColor,
+    title, subTitle, bgType, imgSrc, bgColor, textColor, imageY,
   } = useAppSelector(
     (state) => state.app
   );
 
-  // console.log({
-  //   title, subTitle, bgType, imgSrc, bgColor, textColor,
-  // });
+  useEffect(() => {
+    dispatch(initState());
+  }, []);
+
+  const onClickReset = useCallback(
+    () => {
+      dispatch(initState());
+    },
+    []
+  );
+
+  const onClickDownload = useCallback(
+    () => {
+      html2canvas(thRef.current, { allowTaint: true, useCORS: true, }).then((canvas) => {
+        const img = document.createElement('img');
+        img.src = canvas.toDataURL('image/png');
+
+        imageRef.current.innerHTML = '';
+        imageRef.current.appendChild(img);
+      });
+
+      setIsClick(true);
+    },
+    [ thRef, imageRef, ]
+  );
+
+  const onClickClose = useCallback(
+    () => {
+      setIsClick(false);
+    },
+    []
+  );
 
   const style = {
+    container: css([
+      tw` mb-5 `,
+    ]),
     frame: css([
-      tw` box-content border-2 border-black-600 aspect-video mb-10 relative `,
+      tw` aspect-video relative `,
       (css`
-        color: ${textColor};
+        color: rgb(${textColor.red}, ${textColor.green}, ${textColor.blue});
       `),
       bgType === 'color' && (css`
-        background-color: ${bgColor};
+        background-color: rgb(${bgColor.red}, ${bgColor.green}, ${bgColor.blue});
       `),
       bgType === 'image' && (css`
-        background: url(${imgSrc});
+        background-image: url(${imgSrc});
+        background-size: cover;
+        /* background-position-y: -220px; */
+        background-position-y: -${imageY}px;
       `),
     ]),
     titles: css([
@@ -35,20 +80,38 @@ export function Thumbnail() {
     subTitle: css([
       tw` text-[3rem] font-semibold `,
     ]),
+    buttons: css([
+      tw` flex gap-5 mb-10 `,
+      tw` [button]:( flex-1 shrink-0 bg-blue-400 text-white p-3 hover:( bg-blue-600 ) ) `,
+    ]),
+    image: css([
+      tw` fixed m-0 p-0 left-0 top-0 z-10 bg-black-base/80 w-screen h-screen flex items-center justify-center `,
+    ]),
   };
 
   return (
     <>
-      <div id='th-frame' css={style.frame}>
-        <div id='th-titles' css={style.titles}>
-          <h1 id='th-title' css={style.title}>
-            {title.split('\\n').map((item, index) => (
+      {isClick && (
+        <div css={style.image} ref={imageRef} onClick={onClickClose} />
+      )}
+
+      <div id='th-container' css={style.container} ref={thRef}>
+        <div id='th-frame' css={style.frame}>
+          <div id='th-titles' css={style.titles}>
+            <h1 id='th-title' css={style.title}>
+              {title.split('\\n').map((item, index) => (
               // eslint-disable-next-line react/no-array-index-key
-              <React.Fragment key={`${item}-${index}`}>{item}<br /></React.Fragment>
-            ))}
-          </h1>
-          <h2 id='th-sub-title' css={style.subTitle}>{subTitle}</h2>
+                <React.Fragment key={`${item}-${index}`}>{item}<br /></React.Fragment>
+              ))}
+            </h1>
+            <h2 id='th-sub-title' css={style.subTitle}>{subTitle}</h2>
+          </div>
         </div>
+      </div>
+
+      <div css={style.buttons}>
+        <button onClick={onClickReset}>초기화</button>
+        <button onClick={onClickDownload}>이미지로 저장</button>
       </div>
     </>
   );
