@@ -1,6 +1,8 @@
 import React from 'react';
 import tw, { css } from 'twin.macro';
-import { BackgroundConfig, TextConfig, Thumbnail } from '@/components';
+import {
+  BackgroundConfig, TextConfig, Thumbnail
+} from '@/components';
 
 export default function IndexPage() {
   const style = {

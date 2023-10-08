@@ -8,6 +8,7 @@ import { initState } from '@/redux';
 
 export function Thumbnail() {
   const [ isClick, setIsClick, ] = useState(false);
+  const [ isDisabled, setIsDisabled, ] = useState(false);
 
   const thRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
@@ -23,6 +24,14 @@ export function Thumbnail() {
     dispatch(initState());
   }, []);
 
+  useEffect(() => {
+    if (title === '' || title === '제목을 입력하세요') {
+      setIsDisabled(true);
+    } else {
+      setIsDisabled(false);
+    }
+  }, [ title, ]);
+
   const onClickReset = useCallback(
     () => {
       dispatch(initState());
@@ -32,7 +41,13 @@ export function Thumbnail() {
 
   const onClickDownload = useCallback(
     () => {
-      html2canvas(thRef.current, { allowTaint: true, useCORS: true, }).then((canvas) => {
+      window.scrollTo(0, 0);
+
+      html2canvas(thRef.current, {
+        allowTaint: true,
+        useCORS: true,
+        foreignObjectRendering: true,
+      }).then((canvas) => {
         const img = document.createElement('img');
         img.src = canvas.toDataURL('image/png');
 
@@ -82,7 +97,9 @@ export function Thumbnail() {
     ]),
     buttons: css([
       tw` flex gap-5 mb-10 `,
-      tw` [button]:( flex-1 shrink-0 bg-blue-400 text-white p-3 hover:( bg-blue-600 ) ) `,
+      tw` [button]:( flex-1 shrink-0 bg-blue-400 text-white p-3 hover:( bg-blue-600 ) disabled:(
+        bg-black-300 cursor-not-allowed
+      ) ) `,
     ]),
     image: css([
       tw` fixed m-0 p-0 left-0 top-0 z-10 bg-black-base/80 w-screen h-screen flex items-center justify-center `,
@@ -101,7 +118,7 @@ export function Thumbnail() {
             <h1 id='th-title' css={style.title}>
               {title.split('\\n').map((item, index) => (
               // eslint-disable-next-line react/no-array-index-key
-                <React.Fragment key={`${item}-${index}`}>{item}<br /></React.Fragment>
+                <React.Fragment key={`${item}-${index}`}>{item}</React.Fragment>
               ))}
             </h1>
             <h2 id='th-sub-title' css={style.subTitle}>{subTitle}</h2>
@@ -111,7 +128,7 @@ export function Thumbnail() {
 
       <div css={style.buttons}>
         <button onClick={onClickReset}>초기화</button>
-        <button onClick={onClickDownload}>이미지로 저장</button>
+        <button onClick={onClickDownload} disabled={isDisabled}>이미지로 저장</button>
       </div>
     </>
   );
