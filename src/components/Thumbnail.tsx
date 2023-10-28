@@ -8,7 +8,6 @@ import { initState } from '@/redux';
 
 export function Thumbnail() {
   const [ isClick, setIsClick, ] = useState(false);
-  const [ isDisabled, setIsDisabled, ] = useState(false);
 
   const thRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
@@ -24,14 +23,6 @@ export function Thumbnail() {
     dispatch(initState());
   }, []);
 
-  useEffect(() => {
-    if (title === '' || title === '제목을 입력하세요') {
-      setIsDisabled(true);
-    } else {
-      setIsDisabled(false);
-    }
-  }, [ title, ]);
-
   const onClickReset = useCallback(
     () => {
       dispatch(initState());
@@ -41,15 +32,28 @@ export function Thumbnail() {
 
   const onClickDownload = useCallback(
     () => {
+      const bodyWidth = document.documentElement.clientWidth;
+      const thRefWidth = thRef.current.clientWidth;
+
+      let formula: number;
+
+      if (thRefWidth < bodyWidth) {
+        formula = (bodyWidth - thRefWidth) / 2;
+      }
+
       window.scrollTo(0, 0);
 
       html2canvas(thRef.current, {
         allowTaint: true,
         useCORS: true,
         foreignObjectRendering: true,
+        x: thRefWidth < bodyWidth ? -formula : 0,
+        backgroundColor: `rgb(${bgColor.red}, ${bgColor.green}, ${bgColor.blue})`,
+        logging: true,
       }).then((canvas) => {
         const img = document.createElement('img');
         img.src = canvas.toDataURL('image/png');
+        img.style.display = 'block';
 
         imageRef.current.innerHTML = '';
         imageRef.current.appendChild(img);
@@ -57,7 +61,7 @@ export function Thumbnail() {
 
       setIsClick(true);
     },
-    [ thRef, imageRef, ]
+    [ thRef, imageRef, bgColor, ]
   );
 
   const onClickClose = useCallback(
@@ -69,10 +73,10 @@ export function Thumbnail() {
 
   const style = {
     container: css([
-      tw` mb-5 `,
+      tw` mb-5 overflow-hidden w-[1280px] h-[720px] `,
     ]),
     frame: css([
-      tw` aspect-video relative `,
+      tw` w-[inherit] h-[inherit] relative overflow-auto `,
       (css`
         color: rgb(${textColor.red}, ${textColor.green}, ${textColor.blue});
       `),
@@ -118,7 +122,7 @@ export function Thumbnail() {
             <h1 id='th-title' css={style.title}>
               {title.split('\\n').map((item, index) => (
               // eslint-disable-next-line react/no-array-index-key
-                <React.Fragment key={`${item}-${index}`}>{item}</React.Fragment>
+                <React.Fragment key={`${item}-${index}`}>{item}<br /></React.Fragment>
               ))}
             </h1>
             <h2 id='th-sub-title' css={style.subTitle}>{subTitle}</h2>
@@ -128,7 +132,7 @@ export function Thumbnail() {
 
       <div css={style.buttons}>
         <button onClick={onClickReset}>초기화</button>
-        <button onClick={onClickDownload} disabled={isDisabled}>이미지로 저장</button>
+        <button onClick={onClickDownload}>이미지로 저장</button>
       </div>
     </>
   );
